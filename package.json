@@ -1,0 +1,31 @@
+{
+  "name": "claudetube",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Watch YouTube seamlessly in Cursor while you work with Claude",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/desenyon/ClaudeTube.git"
+  },
+  "author": "desenyon",
+  "license": "MIT",
+  "scripts": {
+    "build": "npm run build --workspace=webview && npm run build --workspace=extension",
+    "build:webview": "npm run build --workspace=webview",
+    "build:extension": "npm run build --workspace=extension",
+    "watch": "concurrently \"npm run watch --workspace=webview\" \"npm run watch --workspace=extension\"",
+    "package": "npm run build && npm run package --workspace=extension",
+    "lint": "npm run lint --workspace=webview && npm run lint --workspace=extension",
+    "test": "npm run test --workspace=extension"
+  },
+  "workspaces": [
+    "extension",
+    "webview"
+  ],
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

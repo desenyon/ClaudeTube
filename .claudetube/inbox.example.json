@@ -1,0 +1,5 @@
+[
+  { "action": "play", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+  { "action": "setLayout", "layout": "mini" },
+  { "action": "setPlaybackRate", "rate": 1.25 }
+]

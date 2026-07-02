@@ -1,0 +1,62 @@
+---
+description: Control ClaudeTube YouTube player from Cursor agent
+globs:
+alwaysApply: true
+---
+
+# ClaudeTube Agent Integration
+
+When the user shares a YouTube URL, asks to play/watch a video, or wants something queued while coding, use ClaudeTube.
+
+## Preferred method: agent inbox
+
+Write a JSON command to `.claudetube/inbox.json` in the workspace root. The extension watches this file and executes immediately.
+
+```json
+{ "action": "play", "url": "https://www.youtube.com/watch?v=VIDEO_ID" }
+```
+
+Multiple commands in one write:
+
+```json
+[
+  { "action": "play", "url": "https://www.youtube.com/watch?v=VIDEO_ID" },
+  { "action": "setLayout", "layout": "mini" }
+]
+```
+
+### Actions
+
+| Action | Fields | Description |
+|--------|--------|-------------|
+| `play` | `url` or `videoId`, optional `title` | Play now in sidebar |
+| `enqueue` | `url` or `videoId`, optional `title` | Add to queue |
+| `toggle` | — | Play/pause |
+| `show` | — | Focus ClaudeTube sidebar |
+| `clearQueue` | — | Clear queue |
+| `setLayout` | `layout`: `compact` \| `theater` \| `mini` | Change layout |
+| `setPlaybackRate` | `rate`: 0.25–2 | Set speed |
+
+## Alternative: shell helper
+
+```bash
+./scripts/claudetube-agent.sh play "https://www.youtube.com/watch?v=VIDEO_ID"
+./scripts/claudetube-agent.sh enqueue "https://youtu.be/VIDEO_ID"
+./scripts/claudetube-agent.sh toggle
+./scripts/claudetube-agent.sh layout mini
+```
+
+## Alternative: VS Code commands
+
+If terminal access to Cursor CLI is available:
+
+- `claudetube.playUrl` — play URL
+- `claudetube.enqueue` — add to queue
+- `claudetube.togglePlay` — play/pause (`Cmd+Shift+Y`)
+- `claudetube.show` — open sidebar (`Cmd+Shift+0`)
+
+## Behavior
+
+- After writing inbox.json, tell the user the video is loading in the ClaudeTube sidebar.
+- For tutorials the user is following, prefer `mini` layout with `setPlaybackRate` 1.25–1.5 when they want to move faster.
+- If embedding fails (owner disabled), suggest opening in browser via the player UI.

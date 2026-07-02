@@ -1,0 +1,147 @@
+{
+  "name": "claudetube-extension",
+  "displayName": "ClaudeTube",
+  "description": "Watch YouTube in a Cursor sidebar while working with Claude",
+  "version": "1.0.0",
+  "publisher": "desenyon",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/desenyon/ClaudeTube.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onView:claudetube.player",
+    "onCommand:claudetube.playUrl",
+    "onCommand:claudetube.playVideoId",
+    "onCommand:claudetube.enqueue",
+    "onCommand:claudetube.togglePlay",
+    "onCommand:claudetube.show",
+    "onCommand:claudetube.clearQueue",
+    "onUri"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "claudetube",
+          "title": "ClaudeTube",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "claudetube": [
+        {
+          "type": "webview",
+          "id": "claudetube.player",
+          "name": "Player"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "claudetube.playUrl",
+        "title": "ClaudeTube: Play URL",
+        "category": "ClaudeTube"
+      },
+      {
+        "command": "claudetube.playVideoId",
+        "title": "ClaudeTube: Play Video ID",
+        "category": "ClaudeTube"
+      },
+      {
+        "command": "claudetube.enqueue",
+        "title": "ClaudeTube: Add to Queue",
+        "category": "ClaudeTube"
+      },
+      {
+        "command": "claudetube.togglePlay",
+        "title": "ClaudeTube: Toggle Play/Pause",
+        "category": "ClaudeTube"
+      },
+      {
+        "command": "claudetube.show",
+        "title": "ClaudeTube: Show Player",
+        "category": "ClaudeTube"
+      },
+      {
+        "command": "claudetube.clearQueue",
+        "title": "ClaudeTube: Clear Queue",
+        "category": "ClaudeTube"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "claudetube.togglePlay",
+        "key": "ctrl+shift+y",
+        "mac": "cmd+shift+y"
+      },
+      {
+        "command": "claudetube.show",
+        "key": "ctrl+shift+0",
+        "mac": "cmd+shift+0"
+      }
+    ],
+    "configuration": {
+      "title": "ClaudeTube",
+      "properties": {
+        "claudetube.defaultLayout": {
+          "type": "string",
+          "enum": [
+            "compact",
+            "theater",
+            "mini"
+          ],
+          "default": "compact",
+          "description": "Default player layout"
+        },
+        "claudetube.defaultPlaybackRate": {
+          "type": "number",
+          "default": 1,
+          "minimum": 0.25,
+          "maximum": 2,
+          "description": "Default playback speed"
+        },
+        "claudetube.miniOpacity": {
+          "type": "number",
+          "default": 1,
+          "minimum": 0.3,
+          "maximum": 1,
+          "description": "Opacity for mini player mode"
+        },
+        "claudetube.autoplay": {
+          "type": "boolean",
+          "default": true,
+          "description": "Autoplay when a new video is loaded"
+        },
+        "claudetube.agentInboxEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Watch .claudetube/inbox.json for agent commands"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "package": "vsce package --no-dependencies",
+    "lint": "tsc --noEmit",
+    "test": "tsx --test src/**/*.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.2.1",
+    "esbuild": "^0.24.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
