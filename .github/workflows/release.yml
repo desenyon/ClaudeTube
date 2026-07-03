@@ -35,4 +35,4 @@ jobs:
         working-directory: extension
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        run: npx vsce publish --no-dependencies -p "$VSCE_PAT"
+        run: npx vsce publish --no-dependencies -p "$VSCE_PAT" --baseContentUrl https://github.com/desenyon/ClaudeTube/blob/main/extension --baseImagesUrl https://github.com/desenyon/ClaudeTube/raw/main/extension
