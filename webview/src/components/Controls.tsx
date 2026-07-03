@@ -1,5 +1,6 @@
 import styles from "../styles/app.module.css";
-import type { LayoutMode } from "../lib/types";
+import type { LayoutMode, RepeatMode } from "../lib/types";
+import { formatDuration } from "../lib/thumbnail";
 
 const LAYOUTS: { id: LayoutMode; label: string }[] = [
   { id: "compact", label: "Compact" },
@@ -8,6 +9,11 @@ const LAYOUTS: { id: LayoutMode; label: string }[] = [
 ];
 
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+const REPEAT_LABELS: Record<RepeatMode, string> = {
+  off: "Repeat off",
+  one: "Repeat one",
+  all: "Repeat all",
+};
 
 interface ControlsProps {
   layout: LayoutMode;
@@ -20,6 +26,11 @@ interface ControlsProps {
   onMuteToggle: () => void;
   isPlaying: boolean;
   onTogglePlay: () => void;
+  onNext: () => void;
+  shuffle: boolean;
+  onShuffleToggle: () => void;
+  repeat: RepeatMode;
+  onRepeatCycle: () => void;
   miniOpacity: number;
   onMiniOpacityChange: (opacity: number) => void;
   currentTime: number;
@@ -27,20 +38,7 @@ interface ControlsProps {
   onSeek: (time: number) => void;
   onEnqueue: () => void;
   hasVideo: boolean;
-}
-
-function formatTime(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds < 0) {
-    return "0:00";
-  }
-  const total = Math.floor(seconds);
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  if (h > 0) {
-    return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  }
-  return `${m}:${s.toString().padStart(2, "0")}`;
+  queueLength: number;
 }
 
 export function Controls({
@@ -54,6 +52,11 @@ export function Controls({
   onMuteToggle,
   isPlaying,
   onTogglePlay,
+  onNext,
+  shuffle,
+  onShuffleToggle,
+  repeat,
+  onRepeatCycle,
   miniOpacity,
   onMiniOpacityChange,
   currentTime,
@@ -61,11 +64,12 @@ export function Controls({
   onSeek,
   onEnqueue,
   hasVideo,
+  queueLength,
 }: ControlsProps) {
   return (
     <div className={styles.controls}>
       <div className={styles.seekRow}>
-        <span className={styles.timeLabel}>{formatTime(currentTime)}</span>
+        <span className={styles.timeLabel}>{formatDuration(currentTime)}</span>
         <input
           className={styles.seekSlider}
           type="range"
@@ -76,7 +80,7 @@ export function Controls({
           disabled={!hasVideo || !duration}
           onChange={(event) => onSeek(Number(event.target.value))}
         />
-        <span className={styles.timeLabel}>{formatTime(duration)}</span>
+        <span className={styles.timeLabel}>{formatDuration(duration)}</span>
       </div>
 
       <div className={styles.controlRow}>
@@ -85,8 +89,37 @@ export function Controls({
           className={styles.controlButton}
           onClick={onTogglePlay}
           disabled={!hasVideo}
+          title="Space"
         >
           {isPlaying ? "Pause" : "Play"}
+        </button>
+
+        <button
+          type="button"
+          className={styles.controlButton}
+          onClick={onNext}
+          disabled={!hasVideo && queueLength === 0}
+          title="Shift+N"
+        >
+          Next
+        </button>
+
+        <button
+          type="button"
+          className={shuffle ? `${styles.controlButton} ${styles.controlActive}` : styles.controlButton}
+          onClick={onShuffleToggle}
+          disabled={queueLength === 0}
+        >
+          Shuffle
+        </button>
+
+        <button
+          type="button"
+          className={repeat !== "off" ? `${styles.controlButton} ${styles.controlActive}` : styles.controlButton}
+          onClick={onRepeatCycle}
+          title={REPEAT_LABELS[repeat]}
+        >
+          {repeat === "one" ? "Repeat 1" : repeat === "all" ? "Repeat all" : "Repeat"}
         </button>
 
         <button
@@ -97,7 +130,9 @@ export function Controls({
         >
           {muted ? "Unmute" : "Mute"}
         </button>
+      </div>
 
+      <div className={styles.controlRow}>
         <label className={styles.inlineControl}>
           Vol
           <input
@@ -115,9 +150,7 @@ export function Controls({
           <select
             value={playbackRate}
             disabled={!hasVideo}
-            onChange={(event) =>
-              onPlaybackRateChange(Number(event.target.value))
-            }
+            onChange={(event) => onPlaybackRateChange(Number(event.target.value))}
           >
             {SPEEDS.map((speed) => (
               <option key={speed} value={speed}>
@@ -164,9 +197,7 @@ export function Controls({
               max={1}
               step={0.05}
               value={miniOpacity}
-              onChange={(event) =>
-                onMiniOpacityChange(Number(event.target.value))
-              }
+              onChange={(event) => onMiniOpacityChange(Number(event.target.value))}
             />
           </label>
         )}

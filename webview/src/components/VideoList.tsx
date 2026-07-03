@@ -1,5 +1,7 @@
+import { useMemo, useState } from "react";
 import styles from "../styles/app.module.css";
 import type { HistoryItem, QueueItem } from "../lib/types";
+import { thumbnailUrlForVideo } from "../lib/thumbnail";
 
 interface VideoListProps {
   title: string;
@@ -8,6 +10,7 @@ interface VideoListProps {
   onSelect: (item: QueueItem | HistoryItem) => void;
   onRemove?: (videoId: string) => void;
   showTimestamp?: boolean;
+  searchable?: boolean;
 }
 
 function formatRelativeTime(timestamp: number): string {
@@ -28,20 +31,44 @@ export function VideoList({
   onSelect,
   onRemove,
   showTimestamp = false,
+  searchable = false,
 }: VideoListProps) {
+  const [query, setQuery] = useState("");
+
+  const filtered = useMemo(() => {
+    if (!query.trim()) {
+      return items;
+    }
+    const q = query.toLowerCase();
+    return items.filter(
+      (item) =>
+        item.title?.toLowerCase().includes(q) ||
+        item.videoId.toLowerCase().includes(q)
+    );
+  }, [items, query]);
+
   return (
     <section className={styles.listSection}>
       <div className={styles.listHeader}>
         <h3>{title}</h3>
         <span className={styles.badge}>{items.length}</span>
       </div>
-      {items.length === 0 ? (
-        <p className={styles.emptyLabel}>{emptyLabel}</p>
+      {searchable && items.length > 0 && (
+        <input
+          className={styles.searchInput}
+          type="search"
+          placeholder="Search..."
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+        />
+      )}
+      {filtered.length === 0 ? (
+        <p className={styles.emptyLabel}>{items.length === 0 ? emptyLabel : "No matches"}</p>
       ) : (
         <ul className={styles.videoList}>
-          {items.map((item) => {
-            const ts =
-              "addedAt" in item ? item.addedAt : item.watchedAt;
+          {filtered.map((item) => {
+            const ts = "addedAt" in item ? item.addedAt : item.watchedAt;
+            const thumb = item.thumbnailUrl ?? thumbnailUrlForVideo(item.videoId);
             return (
               <li key={`${item.videoId}-${ts}`} className={styles.videoListItem}>
                 <button
@@ -49,14 +76,17 @@ export function VideoList({
                   className={styles.videoListButton}
                   onClick={() => onSelect(item)}
                 >
-                  <span className={styles.videoListTitle}>
-                    {item.title ?? item.videoId}
-                  </span>
-                  {showTimestamp && (
-                    <span className={styles.videoListMeta}>
-                      {formatRelativeTime(ts)}
+                  <img className={styles.videoListThumb} src={thumb} alt="" />
+                  <span className={styles.videoListText}>
+                    <span className={styles.videoListTitle}>
+                      {item.title ?? item.videoId}
                     </span>
-                  )}
+                    {showTimestamp && (
+                      <span className={styles.videoListMeta}>
+                        {formatRelativeTime(ts)}
+                      </span>
+                    )}
+                  </span>
                 </button>
                 {onRemove && (
                   <button

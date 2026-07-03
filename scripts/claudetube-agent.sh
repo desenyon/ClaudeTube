@@ -12,6 +12,10 @@ Usage:
   claudetube-agent.sh play <youtube-url-or-id>
   claudetube-agent.sh enqueue <youtube-url-or-id>
   claudetube-agent.sh toggle
+  claudetube-agent.sh next
+  claudetube-agent.sh skip
+  claudetube-agent.sh mute
+  claudetube-agent.sh seek <seconds>
   claudetube-agent.sh show
   claudetube-agent.sh clear
   claudetube-agent.sh layout <compact|theater|mini>
@@ -25,6 +29,10 @@ const fs = require("node:fs");
 const [, , inboxPath, payload] = process.argv;
 fs.writeFileSync(inboxPath, payload);
 NODE
+}
+
+json() {
+  node -e 'console.log(JSON.stringify(JSON.parse(process.argv[1])))' "$1"
 }
 
 if [[ $# -lt 1 ]]; then
@@ -46,6 +54,16 @@ case "$cmd" in
     ;;
   toggle)
     write_inbox '{"action":"toggle"}'
+    ;;
+  next|skip)
+    write_inbox '{"action":"next"}'
+    ;;
+  mute)
+    write_inbox '{"action":"mute"}'
+    ;;
+  seek)
+    [[ $# -ge 1 ]] || { usage; exit 1; }
+    write_inbox "$(node -e 'console.log(JSON.stringify({action:"seek",seconds:Number(process.argv[1])}))' "$1")"
     ;;
   show)
     write_inbox '{"action":"show"}'

@@ -5,8 +5,10 @@ interface PlayerFrameProps {
   layout: "compact" | "theater" | "mini";
   miniOpacity: number;
   hasVideo: boolean;
+  isLoading?: boolean;
   error: string | null;
   onOpenExternal?: () => void;
+  onRetry?: () => void;
 }
 
 export function PlayerFrame({
@@ -14,8 +16,10 @@ export function PlayerFrame({
   layout,
   miniOpacity,
   hasVideo,
+  isLoading = false,
   error,
   onOpenExternal,
+  onRetry,
 }: PlayerFrameProps) {
   const layoutClass =
     layout === "theater"
@@ -30,25 +34,37 @@ export function PlayerFrame({
       style={layout === "mini" ? { opacity: miniOpacity } : undefined}
     >
       {hasVideo ? (
-        <div id={containerId} className={styles.playerMount} />
+        <>
+          <div id={containerId} className={styles.playerMount} />
+          {isLoading && (
+            <div className={styles.playerLoading}>
+              <span className={styles.spinner} />
+              Loading...
+            </div>
+          )}
+        </>
       ) : (
         <div className={styles.playerPlaceholder}>
-          <p>Paste a YouTube URL to start watching</p>
+          <p className={styles.placeholderTitle}>Ready when you are</p>
+          <p className={styles.placeholderHint}>Paste a YouTube URL above</p>
         </div>
       )}
 
       {error && (
         <div className={styles.playerError}>
           <p>{error}</p>
-          {onOpenExternal && (
-            <button
-              type="button"
-              className={styles.secondaryButton}
-              onClick={onOpenExternal}
-            >
-              Open in browser
-            </button>
-          )}
+          <div className={styles.errorActions}>
+            {onRetry && (
+              <button type="button" className={styles.secondaryButton} onClick={onRetry}>
+                Retry
+              </button>
+            )}
+            {onOpenExternal && (
+              <button type="button" className={styles.secondaryButton} onClick={onOpenExternal}>
+                Open in browser
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

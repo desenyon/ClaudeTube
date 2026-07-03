@@ -24,6 +24,7 @@ export interface YouTubePlayerControls {
 
 interface UseYouTubePlayerOptions {
   videoId: string | null;
+  playlistId?: string | null;
   autoplay?: boolean;
   startSeconds?: number;
   volume?: number;
@@ -67,10 +68,12 @@ export function useYouTubePlayer(
 ): {
   controls: YouTubePlayerControls | null;
   isReady: boolean;
+  isLoading: boolean;
   error: string | null;
 } {
   const playerRef = useRef<YT.Player | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const optionsRef = useRef(options);
   optionsRef.current = options;
@@ -88,12 +91,14 @@ export function useYouTubePlayer(
     let intervalId: ReturnType<typeof setInterval> | undefined;
 
     async function init() {
-      if (!options.videoId) {
+      if (!options.videoId && !options.playlistId) {
         destroyPlayer();
         setError(null);
+        setIsLoading(false);
         return;
       }
 
+      setIsLoading(true);
       await loadYouTubeApi();
       if (cancelled) {
         return;
@@ -102,19 +107,26 @@ export function useYouTubePlayer(
       destroyPlayer();
       setError(null);
 
+      const playerVars: Record<string, string | number | undefined> = {
+        autoplay: options.autoplay ? 1 : 0,
+        start: options.startSeconds ? Math.floor(options.startSeconds) : undefined,
+        rel: 0,
+        modestbranding: 1,
+        playsinline: 1,
+        enablejsapi: 1,
+        origin: window.location.origin,
+      };
+
+      if (options.playlistId) {
+        playerVars.listType = "playlist";
+        playerVars.list = options.playlistId;
+      }
+
       playerRef.current = new window.YT.Player(containerId, {
-        videoId: options.videoId!,
+        videoId: options.videoId || undefined,
         width: "100%",
         height: "100%",
-        playerVars: {
-          autoplay: options.autoplay ? 1 : 0,
-          start: options.startSeconds ? Math.floor(options.startSeconds) : undefined,
-          rel: 0,
-          modestbranding: 1,
-          playsinline: 1,
-          enablejsapi: 1,
-          origin: window.location.origin,
-        },
+        playerVars,
         events: {
           onReady: (event) => {
             if (cancelled) {
@@ -131,6 +143,7 @@ export function useYouTubePlayer(
               player.setPlaybackRate(options.playbackRate);
             }
             setIsReady(true);
+            setIsLoading(false);
             optionsRef.current.onReady?.();
           },
           onStateChange: (event) => {
@@ -146,6 +159,7 @@ export function useYouTubePlayer(
               150: "Embedding disabled by owner",
             };
             setError(messages[event.data] ?? `Playback error (${event.data})`);
+            setIsLoading(false);
             optionsRef.current.onError?.(event.data);
           },
         },
@@ -161,7 +175,7 @@ export function useYouTubePlayer(
         if (Number.isFinite(current) && Number.isFinite(duration)) {
           optionsRef.current.onTimeUpdate?.(current, duration);
         }
-      }, 2000);
+      }, 1500);
     }
 
     void init();
@@ -176,6 +190,7 @@ export function useYouTubePlayer(
   }, [
     containerId,
     options.videoId,
+    options.playlistId,
     options.autoplay,
     options.startSeconds,
     destroyPlayer,
@@ -223,5 +238,5 @@ export function useYouTubePlayer(
       }
     : null;
 
-  return { controls, isReady, error };
+  return { controls, isReady, isLoading, error };
 }

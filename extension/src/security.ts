@@ -6,6 +6,10 @@ const ALLOWED_ACTIONS = new Set([
   "toggle",
   "show",
   "clearQueue",
+  "next",
+  "skip",
+  "mute",
+  "seek",
   "setLayout",
   "setPlaybackRate",
 ]);
@@ -24,13 +28,13 @@ const YOUTUBE_HOSTS = new Set([
 const MAX_INFO_MESSAGE_LENGTH = 240;
 const MAX_INBOX_BYTES = 64 * 1024;
 const MAX_INBOX_ACTIONS = 20;
+const MAX_SEEK_SECONDS = 86_400;
 
 export function clampPlaybackRate(rate: number): number | null {
   if (!Number.isFinite(rate)) {
     return null;
   }
-  const clamped = Math.min(2, Math.max(0.25, rate));
-  return clamped;
+  return Math.min(2, Math.max(0.25, rate));
 }
 
 export function isAllowedYouTubeHttpUrl(input: string): boolean {
@@ -83,7 +87,14 @@ export function isAgentAction(value: unknown): value is AgentAction {
     case "toggle":
     case "show":
     case "clearQueue":
+    case "next":
+    case "skip":
+    case "mute":
       return true;
+    case "seek": {
+      const seconds = Number(record.seconds);
+      return Number.isFinite(seconds) && seconds >= 0 && seconds <= MAX_SEEK_SECONDS;
+    }
     case "setLayout":
       return (
         typeof record.layout === "string" &&
@@ -120,5 +131,11 @@ export function validateInboxPayload(raw: string): AgentAction[] {
 }
 
 export function isWebviewMessage(value: unknown): value is { type: string } {
-  return Boolean(value && typeof value === "object" && typeof (value as { type?: unknown }).type === "string");
+  return Boolean(
+    value && typeof value === "object" && typeof (value as { type?: unknown }).type === "string"
+  );
+}
+
+export function sanitizeClipboardText(text: string): string {
+  return text.trim().slice(0, 500);
 }

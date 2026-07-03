@@ -6,57 +6,46 @@ alwaysApply: true
 
 # ClaudeTube Agent Integration
 
-When the user shares a YouTube URL, asks to play/watch a video, or wants something queued while coding, use ClaudeTube.
+When the user shares a YouTube URL, asks to play/watch a video, or wants queue control while coding, use ClaudeTube.
 
-## Preferred method: agent inbox
+## Preferred: agent inbox
 
-Write a JSON command to `.claudetube/inbox.json` in the workspace root. The extension watches this file and executes immediately.
+Write JSON to `.claudetube/inbox.json` in the workspace root:
 
 ```json
 { "action": "play", "url": "https://www.youtube.com/watch?v=VIDEO_ID" }
 ```
 
-Multiple commands in one write:
+Read playback state from `.claudetube/status.json` (updated automatically).
 
-```json
-[
-  { "action": "play", "url": "https://www.youtube.com/watch?v=VIDEO_ID" },
-  { "action": "setLayout", "layout": "mini" }
-]
-```
+## Actions
 
-### Actions
+| Action | Payload |
+|--------|---------|
+| Play | `{ "action": "play", "url": "..." }` or `{ "action": "play", "videoId": "..." }` |
+| Enqueue | `{ "action": "enqueue", "url": "..." }` |
+| Next / skip | `{ "action": "next" }` |
+| Toggle | `{ "action": "toggle" }` |
+| Mute | `{ "action": "mute" }` |
+| Seek | `{ "action": "seek", "seconds": 120 }` |
+| Show sidebar | `{ "action": "show" }` |
+| Clear queue | `{ "action": "clearQueue" }` |
+| Layout | `{ "action": "setLayout", "layout": "mini" }` |
+| Speed | `{ "action": "setPlaybackRate", "rate": 1.5 }` |
 
-| Action | Fields | Description |
-|--------|--------|-------------|
-| `play` | `url` or `videoId`, optional `title` | Play now in sidebar |
-| `enqueue` | `url` or `videoId`, optional `title` | Add to queue |
-| `toggle` | — | Play/pause |
-| `show` | — | Focus ClaudeTube sidebar |
-| `clearQueue` | — | Clear queue |
-| `setLayout` | `layout`: `compact` \| `theater` \| `mini` | Change layout |
-| `setPlaybackRate` | `rate`: 0.25–2 | Set speed |
+Layouts: `compact`, `theater`, `mini`
 
-## Alternative: shell helper
+## Shell helper
 
 ```bash
-./scripts/claudetube-agent.sh play "https://www.youtube.com/watch?v=VIDEO_ID"
-./scripts/claudetube-agent.sh enqueue "https://youtu.be/VIDEO_ID"
-./scripts/claudetube-agent.sh toggle
+./scripts/claudetube-agent.sh play "URL"
+./scripts/claudetube-agent.sh next
+./scripts/claudetube-agent.sh seek 120
 ./scripts/claudetube-agent.sh layout mini
 ```
 
-## Alternative: VS Code commands
+## Tips
 
-If terminal access to Cursor CLI is available:
-
-- `claudetube.playUrl` — play URL
-- `claudetube.enqueue` — add to queue
-- `claudetube.togglePlay` — play/pause (`Cmd+Shift+Y`)
-- `claudetube.show` — open sidebar (`Cmd+Shift+0`)
-
-## Behavior
-
-- After writing inbox.json, tell the user the video is loading in the ClaudeTube sidebar.
-- For tutorials the user is following, prefer `mini` layout with `setPlaybackRate` 1.25–1.5 when they want to move faster.
-- If embedding fails (owner disabled), suggest opening in browser via the player UI.
+- For tutorials, use `mini` layout and 1.25–1.5x speed.
+- Check `status.json` before seeking or skipping.
+- Playlist URLs are supported.

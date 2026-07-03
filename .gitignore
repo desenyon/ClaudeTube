@@ -5,3 +5,4 @@ out/
 .DS_Store
 .claudetube/inbox.json
 .claudetube/inbox.processed.json
+.claudetube/status.json

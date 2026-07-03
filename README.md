@@ -1,63 +1,35 @@
 <p align="center">
-  <img src="extension/media/icon.svg" width="72" alt="ClaudeTube" />
+  <img src="extension/media/icon.svg" width="80" alt="ClaudeTube" />
 </p>
 
 <h1 align="center">ClaudeTube</h1>
 
 <p align="center">
-  <strong>YouTube in your Cursor sidebar. Zero tab switching.</strong>
+  <strong>YouTube in your Cursor sidebar. Zero tab switching. Agent-controlled.</strong>
 </p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" /></a>
+  <a href="https://github.com/desenyon/ClaudeTube/actions"><img src="https://img.shields.io/badge/CI-GitHub_Actions-2088FF?logo=githubactions&logoColor=white" alt="CI" /></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js&logoColor=white" alt="Node" /></a>
-  <a href="https://cursor.com"><img src="https://img.shields.io/badge/built%20for-Cursor-000000" alt="Built for Cursor" /></a>
+  <a href="https://cursor.com"><img src="https://img.shields.io/badge/built%20for-Cursor-000000" alt="Cursor" /></a>
+  <img src="https://img.shields.io/badge/version-2.0.0-0078d4" alt="Version" />
 </p>
 
 <p align="center">
-  Watch tutorials, talks, and lo-fi beats while you code with Claude — embedded in a sidebar panel, controlled by keyboard shortcuts, and drivable by your agent.
+  Watch tutorials, talks, and music while you code with Claude — embedded in a sidebar, with queue, thumbnails, status bar, and full agent API.
+</p>
+
+<p align="center">
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#agent-integration">Agent API</a> ·
+  <a href="#development">Development</a>
 </p>
 
 ---
 
-## Why ClaudeTube?
-
-You're pair-programming with Claude. A video would help. But switching to a browser tab breaks flow.
-
-ClaudeTube keeps YouTube inside Cursor:
-
-- **Sidebar player** — always visible beside your editor
-- **Paste and play** — any YouTube URL, short link, Shorts, or live stream
-- **Queue and history** — line up tutorials, resume where you left off
-- **Agent-ready** — Claude can start videos for you via a simple inbox file
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│  Cursor                                                      │
-│  ┌────────────┐  ┌─────────────────────┐  ┌──────────────┐ │
-│  │  Explorer  │  │  Your code + Claude │  │  ClaudeTube  │ │
-│  │            │  │                     │  │  ┌──────────┐  │ │
-│  │            │  │                     │  │  │ ▶ Video  │  │ │
-│  │            │  │                     │  │  └──────────┘  │ │
-│  └────────────┘  └─────────────────────┘  │  [url bar]   │ │
-│                                             └──────────────┘ │
-└──────────────────────────────────────────────────────────────┘
-```
-
-## Features
-
-| | |
-|---|---|
-| **Layouts** | Compact, Theater, and Mini (with opacity control) |
-| **Playback** | Speed 0.5x–2x, seek, volume, mute |
-| **Queue** | Add videos, auto-advance on end |
-| **History** | Last 30 videos with resume position |
-| **Shortcuts** | `Cmd+Shift+Y` play/pause, `Cmd+Shift+0` focus player |
-| **Agent API** | Inbox file, shell script, and palette commands |
-
 ## Quick start
-
-### Install from source
 
 ```bash
 git clone https://github.com/desenyon/ClaudeTube.git
@@ -67,32 +39,94 @@ npm run build
 npm run package
 ```
 
-Install the VSIX: **Cursor → Extensions → `...` → Install from VSIX** → select `extension/claudetube-extension-1.0.0.vsix`
+**Install:** Cursor → Extensions → `...` → **Install from VSIX** → `extension/claudetube-extension-2.0.0.vsix`
 
-Reload the window, click the **ClaudeTube** icon in the activity bar, paste a URL, hit **Play**.
+**Use:** Reload window → click **ClaudeTube** in the activity bar → paste a URL → **Play**
 
-### Develop
+Or press **F5** to develop with the Extension Development Host.
 
-```bash
-npm run watch   # rebuild on change
+---
+
+## Features
+
+### Player
+- Sidebar YouTube player (IFrame API) with **Compact**, **Theater**, and **Mini** layouts
+- Paste any URL: watch, youtu.be, Shorts, live, or **playlist**
+- Auto-fetch **titles and thumbnails** (oEmbed)
+- Resume position, seek, speed (0.5x–2x), volume, mute
+- **Shuffle** and **repeat** (off / one / all)
+- Loading states and embed-fallback to browser
+
+### Queue & history
+- Queue with auto-advance, skip, and manual next
+- **50-video history** with search and resume
+- Thumbnail previews in lists
+
+### IDE integration
+- **Status bar** now-playing indicator
+- **Click YouTube links** in editor to play
+- Context menu: **Play URL at Cursor**
+- Theme-aware UI (dark / light / high contrast)
+
+### Agent-ready
+- Write commands to `.claudetube/inbox.json`
+- Read state from `.claudetube/status.json`
+- Shell script + Cursor rule included
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│  Cursor                                                        │
+│  ┌──────────┐  ┌──────────────────────┐  ┌─────────────────┐  │
+│  │ Explorer │  │  Code + Claude chat  │  │   ClaudeTube    │  │
+│  │          │  │                      │  │  ┌───────────┐  │  │
+│  │          │  │                      │  │  │  ▶ Video  │  │  │
+│  │          │  │                      │  │  └───────────┘  │  │
+│  └──────────┘  └──────────────────────┘  │  Now playing…   │  │
+│  Status bar: ▶ Tutorial title…          └─────────────────┘  │
+└────────────────────────────────────────────────────────────────┘
 ```
 
-Press **F5** in Cursor to launch the Extension Development Host.
+---
+
+## Keyboard shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Cmd+Shift+Y` | Toggle play/pause |
+| `Cmd+Shift+0` | Show ClaudeTube sidebar |
+| `Cmd+Shift+.` | Play next in queue |
+| `Space` | Play/pause (when sidebar focused) |
+| `Shift+N` | Skip to next |
+
+---
 
 ## Agent integration
 
-Claude can control playback by writing to `.claudetube/inbox.json`:
+### Send commands
 
 ```json
 { "action": "play", "url": "https://www.youtube.com/watch?v=VIDEO_ID" }
 ```
 
-Or use the helper script:
-
 ```bash
 ./scripts/claudetube-agent.sh play "https://www.youtube.com/watch?v=VIDEO_ID"
+./scripts/claudetube-agent.sh next
+./scripts/claudetube-agent.sh seek 120
 ./scripts/claudetube-agent.sh layout mini
-./scripts/claudetube-agent.sh speed 1.5
+```
+
+### Read status
+
+```json
+// .claudetube/status.json
+{
+  "videoId": "dQw4w9WgXcQ",
+  "title": "Never Gonna Give You Up",
+  "isPlaying": true,
+  "currentTime": 42,
+  "queueLength": 3,
+  "layout": "mini"
+}
 ```
 
 <details>
@@ -102,59 +136,81 @@ Or use the helper script:
 |--------|---------|
 | Play | `{ "action": "play", "url": "..." }` |
 | Enqueue | `{ "action": "enqueue", "url": "..." }` |
+| Next | `{ "action": "next" }` |
 | Toggle | `{ "action": "toggle" }` |
-| Show sidebar | `{ "action": "show" }` |
+| Mute | `{ "action": "mute" }` |
+| Seek | `{ "action": "seek", "seconds": 120 }` |
+| Show | `{ "action": "show" }` |
 | Clear queue | `{ "action": "clearQueue" }` |
-| Set layout | `{ "action": "setLayout", "layout": "mini" }` |
-| Set speed | `{ "action": "setPlaybackRate", "rate": 1.5 }` |
+| Layout | `{ "action": "setLayout", "layout": "mini" }` |
+| Speed | `{ "action": "setPlaybackRate", "rate": 1.5 }` |
 
 </details>
+
+---
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `ClaudeTube: Play URL` | Play a YouTube URL or video ID |
-| `ClaudeTube: Add to Queue` | Queue without interrupting playback |
-| `ClaudeTube: Toggle Play/Pause` | Toggle playback |
-| `ClaudeTube: Show Player` | Focus the sidebar |
-| `ClaudeTube: Clear Queue` | Empty the queue |
+| ClaudeTube: Play URL | Play from palette or argument |
+| ClaudeTube: Play URL at Cursor | Play selected YouTube link |
+| ClaudeTube: Add to Queue | Queue without interrupting |
+| ClaudeTube: Play Next in Queue | Skip to next |
+| ClaudeTube: Toggle Play/Pause | Toggle playback |
+| ClaudeTube: Copy Current Video URL | Copy to clipboard |
+| ClaudeTube: Show Player | Focus sidebar |
+
+---
 
 ## Settings
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `claudetube.defaultLayout` | `compact` | Default player layout |
-| `claudetube.defaultPlaybackRate` | `1` | Default playback speed |
+| `claudetube.defaultLayout` | `compact` | Default layout |
+| `claudetube.defaultPlaybackRate` | `1` | Default speed |
 | `claudetube.miniOpacity` | `1` | Mini player opacity |
-| `claudetube.autoplay` | `true` | Autoplay when loading a video |
-| `claudetube.agentInboxEnabled` | `true` | Watch `.claudetube/inbox.json` |
+| `claudetube.autoplay` | `true` | Autoplay new videos |
+| `claudetube.agentInboxEnabled` | `true` | Watch agent inbox |
+| `claudetube.showStatusBar` | `true` | Status bar indicator |
 
-## Project structure
+---
 
-```
-ClaudeTube/
-├── extension/       # VS Code / Cursor extension host
-├── webview/         # React sidebar UI
-├── scripts/         # Agent CLI helper
-└── .cursor/rules/   # Cursor agent integration rules
-```
-
-## Scripts
+## Development
 
 ```bash
 npm run build      # Build webview + extension
-npm run watch      # Watch mode for development
-npm run test       # Run unit + security tests
-npm run package    # Build and create .vsix
+npm run watch      # Watch mode
+npm test           # Unit + security tests
+npm run package    # Create .vsix
 ```
 
-## Notes
+### Project structure
 
-- Some videos block embedding — use **Open in browser** in the player UI.
-- Playback state persists in extension global storage.
-- Agent inbox is workspace-scoped: `.claudetube/inbox.json`.
+```
+ClaudeTube/
+├── extension/          # VS Code / Cursor extension host
+├── webview/            # React sidebar UI
+├── scripts/            # Agent CLI
+├── .github/workflows/  # CI
+└── .cursor/rules/      # Agent rules for Cursor
+```
+
+---
+
+## Security
+
+- HTTPS-only YouTube URLs
+- Validated agent inbox (size limits, action allowlist)
+- Safe external URL opening (YouTube hosts only)
+- Sanitized webview messages
+
+---
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) — [desenyon](https://github.com/desenyon)

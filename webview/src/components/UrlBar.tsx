@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import styles from "../styles/app.module.css";
 
 interface UrlBarProps {
@@ -8,13 +9,16 @@ interface UrlBarProps {
   disabled?: boolean;
 }
 
-export function UrlBar({
-  value,
-  onChange,
-  onSubmit,
-  placeholder = "Paste YouTube URL or video ID",
-  disabled = false,
-}: UrlBarProps) {
+export const UrlBar = forwardRef<HTMLInputElement, UrlBarProps>(function UrlBar(
+  {
+    value,
+    onChange,
+    onSubmit,
+    placeholder = "Paste YouTube URL, playlist, or video ID",
+    disabled = false,
+  },
+  ref
+) {
   return (
     <form
       className={styles.urlBar}
@@ -24,6 +28,7 @@ export function UrlBar({
       }}
     >
       <input
+        ref={ref}
         className={styles.urlInput}
         type="text"
         value={value}
@@ -37,4 +42,4 @@ export function UrlBar({
       </button>
     </form>
   );
-}
+});

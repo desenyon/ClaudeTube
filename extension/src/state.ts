@@ -8,11 +8,16 @@ export class StateStore {
   constructor(private readonly context: vscode.ExtensionContext) {}
 
   getState(): ClaudeTubeState {
-    return this.context.globalState.get<ClaudeTubeState>(STATE_KEY, {
+    const stored = this.context.globalState.get<Partial<ClaudeTubeState>>(STATE_KEY, {});
+    return {
       ...DEFAULT_STATE,
-      queue: [],
-      history: [],
-    });
+      ...stored,
+      queue: stored.queue ?? [],
+      history: stored.history ?? [],
+      playlistId: stored.playlistId ?? null,
+      shuffle: stored.shuffle ?? false,
+      repeat: stored.repeat ?? "off",
+    };
   }
 
   async updateState(partial: Partial<ClaudeTubeState>): Promise<ClaudeTubeState> {

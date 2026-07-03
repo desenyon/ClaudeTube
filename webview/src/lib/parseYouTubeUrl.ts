@@ -8,23 +8,42 @@ const YOUTUBE_HOSTS = new Set([
 ]);
 
 const VIDEO_ID_PATTERN = /^[a-zA-Z0-9_-]{11}$/;
+const PLAYLIST_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 
 export interface ParsedYouTubeUrl {
-  videoId: string;
+  videoId: string | null;
+  playlistId?: string;
   url: string;
   startSeconds?: number;
+  isPlaylistOnly?: boolean;
 }
 
 export function isValidVideoId(value: string): boolean {
   return VIDEO_ID_PATTERN.test(value);
 }
 
-export function buildYouTubeUrl(videoId: string, startSeconds?: number): string {
-  const base = `https://www.youtube.com/watch?v=${videoId}`;
-  if (startSeconds && startSeconds > 0) {
-    return `${base}&t=${Math.floor(startSeconds)}s`;
+export function isValidPlaylistId(value: string): boolean {
+  return PLAYLIST_ID_PATTERN.test(value) && value.startsWith("PL") && value.length >= 13;
+}
+
+export function buildYouTubeUrl(
+  videoId: string | null,
+  startSeconds?: number,
+  playlistId?: string
+): string {
+  if (playlistId && !videoId) {
+    return `https://www.youtube.com/playlist?list=${playlistId}`;
   }
-  return base;
+  const base = `https://www.youtube.com/watch?v=${videoId ?? ""}`;
+  const params = new URLSearchParams();
+  if (playlistId) {
+    params.set("list", playlistId);
+  }
+  if (startSeconds && startSeconds > 0) {
+    params.set("t", `${Math.floor(startSeconds)}s`);
+  }
+  const query = params.toString();
+  return query ? `${base}&${query}` : base;
 }
 
 export function parseYouTubeUrl(input: string): ParsedYouTubeUrl | null {
@@ -34,8 +53,7 @@ export function parseYouTubeUrl(input: string): ParsedYouTubeUrl | null {
   }
 
   if (isValidVideoId(trimmed)) {
-    const url = buildYouTubeUrl(trimmed);
-    return { videoId: trimmed, url };
+    return { videoId: trimmed, url: buildYouTubeUrl(trimmed) };
   }
 
   let parsed: URL;
@@ -50,7 +68,13 @@ export function parseYouTubeUrl(input: string): ParsedYouTubeUrl | null {
   }
 
   let videoId: string | null = null;
+  let playlistId: string | undefined;
   let startSeconds: number | undefined;
+
+  const listParam = parsed.searchParams.get("list") ?? undefined;
+  if (listParam && isValidPlaylistId(listParam)) {
+    playlistId = listParam;
+  }
 
   if (parsed.hostname.includes("youtu.be")) {
     videoId = parsed.pathname.replace(/^\//, "").split("/")[0] || null;
@@ -62,6 +86,13 @@ export function parseYouTubeUrl(input: string): ParsedYouTubeUrl | null {
     videoId = parsed.pathname.split("/")[2] ?? null;
   } else if (parsed.pathname.startsWith("/live/")) {
     videoId = parsed.pathname.split("/")[2] ?? null;
+  } else if (parsed.pathname === "/playlist" && playlistId) {
+    return {
+      videoId: null,
+      playlistId,
+      url: buildYouTubeUrl(null, undefined, playlistId),
+      isPlaylistOnly: true,
+    };
   }
 
   const tParam = parsed.searchParams.get("t") ?? parsed.searchParams.get("start");
@@ -69,14 +100,20 @@ export function parseYouTubeUrl(input: string): ParsedYouTubeUrl | null {
     startSeconds = parseTimeParam(tParam);
   }
 
-  if (!videoId || !isValidVideoId(videoId)) {
+  if (videoId && !isValidVideoId(videoId)) {
+    videoId = null;
+  }
+
+  if (!videoId && !playlistId) {
     return null;
   }
 
   return {
     videoId,
-    url: buildYouTubeUrl(videoId, startSeconds),
+    playlistId,
+    url: buildYouTubeUrl(videoId, startSeconds, playlistId),
     startSeconds,
+    isPlaylistOnly: !videoId && Boolean(playlistId),
   };
 }
 
@@ -95,10 +132,4 @@ function parseTimeParam(value: string): number | undefined {
   const seconds = Number(match[3] || 0);
   const total = hours * 3600 + minutes * 60 + seconds;
   return total > 0 ? total : undefined;
-}
-
-export function extractYouTubeUrls(text: string): string[] {
-  const urlPattern =
-    /https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\?[^\s]+|embed\/[^\s]+|shorts\/[^\s]+|live\/[^\s]+)|youtu\.be\/[^\s]+)/gi;
-  return [...new Set(text.match(urlPattern) ?? [])];
 }

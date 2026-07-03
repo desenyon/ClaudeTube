@@ -1,8 +1,8 @@
 {
   "name": "claudetube-extension",
   "displayName": "ClaudeTube",
-  "description": "Watch YouTube in a Cursor sidebar while working with Claude",
-  "version": "1.0.0",
+  "description": "YouTube in your Cursor sidebar — watch, queue, and agent-control videos while you code with Claude",
+  "version": "2.0.0",
   "publisher": "desenyon",
   "license": "MIT",
   "repository": {
@@ -15,15 +15,16 @@
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "youtube",
+    "cursor",
+    "claude",
+    "sidebar",
+    "player",
+    "video"
+  ],
   "activationEvents": [
-    "onView:claudetube.player",
-    "onCommand:claudetube.playUrl",
-    "onCommand:claudetube.playVideoId",
-    "onCommand:claudetube.enqueue",
-    "onCommand:claudetube.togglePlay",
-    "onCommand:claudetube.show",
-    "onCommand:claudetube.clearQueue",
-    "onUri"
+    "onStartupFinished"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -48,35 +49,87 @@
     "commands": [
       {
         "command": "claudetube.playUrl",
-        "title": "ClaudeTube: Play URL",
+        "title": "Play URL",
+        "category": "ClaudeTube",
+        "icon": "$(play)"
+      },
+      {
+        "command": "claudetube.playUrlAtCursor",
+        "title": "Play URL at Cursor",
         "category": "ClaudeTube"
       },
       {
         "command": "claudetube.playVideoId",
-        "title": "ClaudeTube: Play Video ID",
+        "title": "Play Video ID",
         "category": "ClaudeTube"
       },
       {
         "command": "claudetube.enqueue",
-        "title": "ClaudeTube: Add to Queue",
-        "category": "ClaudeTube"
+        "title": "Add to Queue",
+        "category": "ClaudeTube",
+        "icon": "$(add)"
       },
       {
         "command": "claudetube.togglePlay",
-        "title": "ClaudeTube: Toggle Play/Pause",
-        "category": "ClaudeTube"
+        "title": "Toggle Play/Pause",
+        "category": "ClaudeTube",
+        "icon": "$(debug-pause)"
+      },
+      {
+        "command": "claudetube.next",
+        "title": "Play Next in Queue",
+        "category": "ClaudeTube",
+        "icon": "$(skip-forward)"
       },
       {
         "command": "claudetube.show",
-        "title": "ClaudeTube: Show Player",
-        "category": "ClaudeTube"
+        "title": "Show Player",
+        "category": "ClaudeTube",
+        "icon": "$(device-camera-video)"
       },
       {
         "command": "claudetube.clearQueue",
-        "title": "ClaudeTube: Clear Queue",
+        "title": "Clear Queue",
+        "category": "ClaudeTube"
+      },
+      {
+        "command": "claudetube.copyCurrentUrl",
+        "title": "Copy Current Video URL",
         "category": "ClaudeTube"
       }
     ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "claudetube.playUrlAtCursor",
+          "when": "editorHasSelection",
+          "group": "navigation@99"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "claudetube.playUrl"
+        },
+        {
+          "command": "claudetube.playUrlAtCursor"
+        },
+        {
+          "command": "claudetube.enqueue"
+        },
+        {
+          "command": "claudetube.togglePlay"
+        },
+        {
+          "command": "claudetube.next"
+        },
+        {
+          "command": "claudetube.show"
+        },
+        {
+          "command": "claudetube.copyCurrentUrl"
+        }
+      ]
+    },
     "keybindings": [
       {
         "command": "claudetube.togglePlay",
@@ -87,6 +140,11 @@
         "command": "claudetube.show",
         "key": "ctrl+shift+0",
         "mac": "cmd+shift+0"
+      },
+      {
+        "command": "claudetube.next",
+        "key": "ctrl+shift+.",
+        "mac": "cmd+shift+."
       }
     ],
     "configuration": {
@@ -94,11 +152,7 @@
       "properties": {
         "claudetube.defaultLayout": {
           "type": "string",
-          "enum": [
-            "compact",
-            "theater",
-            "mini"
-          ],
+          "enum": ["compact", "theater", "mini"],
           "default": "compact",
           "description": "Default player layout"
         },
@@ -125,6 +179,11 @@
           "type": "boolean",
           "default": true,
           "description": "Watch .claudetube/inbox.json for agent commands"
+        },
+        "claudetube.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show now-playing item in the status bar"
         }
       }
     }
