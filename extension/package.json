@@ -193,7 +193,7 @@
     "watch": "node esbuild.mjs --watch",
     "package": "vsce package --no-dependencies",
     "lint": "tsc --noEmit",
-    "test": "tsx --test src/**/*.test.ts"
+    "test": "node run-tests.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
