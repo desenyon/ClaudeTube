@@ -1,5 +1,7 @@
 src/**
 tsconfig.json
 esbuild.mjs
+run-tests.mjs
 **/*.map
 **/.DS_Store
+../**

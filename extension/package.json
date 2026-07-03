@@ -1,10 +1,19 @@
 {
-  "name": "claudetube-extension",
+  "name": "claudetube",
   "displayName": "ClaudeTube",
   "description": "YouTube in your Cursor sidebar — watch, queue, and agent-control videos while you code with Claude",
   "version": "2.0.0",
   "publisher": "desenyon",
   "license": "MIT",
+  "icon": "media/icon.png",
+  "homepage": "https://github.com/desenyon/ClaudeTube#readme",
+  "bugs": {
+    "url": "https://github.com/desenyon/ClaudeTube/issues"
+  },
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/desenyon/ClaudeTube.git"
@@ -192,6 +201,7 @@
     "build": "node esbuild.mjs",
     "watch": "node esbuild.mjs --watch",
     "package": "vsce package --no-dependencies",
+    "publish:marketplace": "vsce publish --no-dependencies",
     "lint": "tsc --noEmit",
     "test": "node run-tests.mjs"
   },
